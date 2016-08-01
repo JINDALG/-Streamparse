@@ -57,4 +57,4 @@ class Motion_Frame(Bolt):
 				i += per_frame
 
 			self.emit([a,x.split('.')[0]])
-			self.log('video -%s\n frame no.- %d'%(x,i))
+			# self.log('video -%s\n frame no.- %d'%(x,i))
