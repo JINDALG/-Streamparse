@@ -11,25 +11,14 @@ import matplotlib.animation as animation
 from datetime import datetime
 from streamparse.bolt import Bolt
 import os
+from spouts import tk
+def build_gif(imgs,sID = '',name=''):
 
-def build_gif(imgs, show_gif=True, save_gif=True, title='',sID = ''):
-
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	ax.set_axis_off()
-
-	ims = map(lambda x: (ax.imshow(x), ax.set_title(title)), imgs)
-
-	im_ani = animation.ArtistAnimation(fig, ims, interval=800, repeat_delay=0, blit=False)
-
-	if save_gif:
-		if not os.path.exists(sID):
-			os.makedirs(sID)
-		im_ani.save(sID+'/animation.gif', writer='imagemagick')
-		plt.show()
+	cv2.imwrite(sID+'/'+name+'-1'+'.jpeg',imgs[0])
+	cv2.imwrite(sID+'/'+name+'-2'+'.jpeg',imgs[1])
+	cv2.imwrite(sID+'/'+name+'-3'+'.jpeg',imgs[2])
 	return
-
-
+	
 def json_numpy_obj_hook(dct):
 	"""Decodes a previously encoded numpy ndarray with proper shape and dtype.
 
@@ -65,30 +54,31 @@ class Motion_Bolt(Bolt):
 		(cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 		min_area = 500
 		for c in cnts:
-			if cv2.contourArea(c) < min_area:
+			if cv2.contourArea(c) < tk.area_value:
 				continue
 			(x, y, w, h) = cv2.boundingRect(c)
-			cv2.rectangle(frames[1], (x, y), (x + w, y + h), (0, 255, 0), 2)
+			cv2.rectangle(frames[1], (x, y), (x + w, y + h), (0, 255, 0), 2) # creating bounding rectangle
 			flag = 1
 
 		if flag == 0:
 			z = None
 		else:
-			z = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S motion'))
+			z = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 			if not os.path.exists(sID):
 				os.makedirs(sID)
 				with open(sID+'/log.txt','w') as log:
 					log.write(z)
-				build_gif(imgs =frames,sID=sID)
+				build_gif(imgs =frames,sID=sID,name = z.split()[1])
 			else :
 				with open(sID+'/log.txt','r+') as log:
 					prev = log.read()
-					prev = prev.replace(' motion','')
 					prev = datetime.strptime(prev, '%Y-%m-%d %H:%M:%S')
 					diff = datetime.now()-prev
 					diff = diff.seconds
-					if diff >= 30:
+					if diff >= tk.time_value:
 						log.write(z)
-						build_gif(imgs =frames,sID=sID)
+						build_gif(imgs =frames,sID=sID,name = z.split()[1])
+					else :
+						z += "time diff is less"
 		self.emit([z,sID])
-		self.log('%s' %(z))
+		self.log(tk.area_value,t.time_value)
