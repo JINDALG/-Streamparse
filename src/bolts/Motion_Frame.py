@@ -5,7 +5,6 @@ import numpy as np
 import time
 # import imutils
 import base64
-from spouts import tk
 from datetime import datetime
 from streamparse.bolt import Bolt
 import json
@@ -57,4 +56,5 @@ class Motion_Frame(Bolt):
 				i += per_frame
 
 			self.emit([a,x.split('/')[-1].split('.')[0]])
-			self.log('video -%s\n frame no.- %d'%(x.split('/')[-1].split('.')[0],i))
+			# self.log('video -%s\n frame no.- %d'%(x.split('/')[-1].split('.')[0],i))
+			# self.log("")

@@ -11,8 +11,7 @@ import matplotlib.animation as animation
 from datetime import datetime
 from streamparse.bolt import Bolt
 import os
-from spouts import tk
-def build_gif(imgs,sID = '',name=''):
+def build_gif(imgs,sID,name):
 
 	cv2.imwrite(sID+'/'+name+'-1'+'.jpeg',imgs[0])
 	cv2.imwrite(sID+'/'+name+'-2'+'.jpeg',imgs[1])
@@ -54,31 +53,31 @@ class Motion_Bolt(Bolt):
 		(cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 		min_area = 500
 		for c in cnts:
-			if cv2.contourArea(c) < tk.area_value:
+			if cv2.contourArea(c) < 500:
 				continue
 			(x, y, w, h) = cv2.boundingRect(c)
 			cv2.rectangle(frames[1], (x, y), (x + w, y + h), (0, 255, 0), 2) # creating bounding rectangle
 			flag = 1
 
 		if flag == 0:
-			z = None
+			z = ""
 		else:
-			z = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-			if not os.path.exists(sID):
-				os.makedirs(sID)
-				with open(sID+'/log.txt','w') as log:
+			path="/home/shivji/Desktop/Streamparse/snapshot"+'/'+sID
+			if not os.path.exists(path):
+				os.makedirs(path)
+				with open(path+'/log.txt','w') as log:
+					z = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 					log.write(z)
-				build_gif(imgs =frames,sID=sID,name = z.split()[1])
+				build_gif(imgs =frames,sID=path,name = z.split()[1])
 			else :
-				with open(sID+'/log.txt','r+') as log:
-					prev = log.read()
+				with open(path+'/log.txt','ab+') as log:
+					prev = log.read().split('\n')[-1]
 					prev = datetime.strptime(prev, '%Y-%m-%d %H:%M:%S')
 					diff = datetime.now()-prev
 					diff = diff.seconds
-					if diff >= tk.time_value:
-						log.write(z)
-						build_gif(imgs =frames,sID=sID,name = z.split()[1])
-					else :
-						z += "time diff is less"
+					z = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+					if diff >= 10:
+						log.write('\n'+z)
+						build_gif(imgs =frames,sID=path,name = z.split()[1])
 		self.emit([z,sID])
-		self.log(tk.area_value,t.time_value)
+		self.log(sID +" "+ z)

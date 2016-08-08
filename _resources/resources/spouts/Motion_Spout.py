@@ -11,10 +11,10 @@ from streamparse.spout import Spout
 class Motion_Spout(Spout):
  	def initialize(self, stormconf, context):
 		# URLs = "rtsp://admin:zencam123@192.168.1.202:554/videoMain"
+		path = "/media/shivji/Mind Fresh/Entertainment/song"
 		URLs = []
-		os.chdir("/media/shivji/Mind Fresh/Entertainment/song")
-		for fn in os.listdir('.'):
-			URLs.append("/media/shivji/Mind Fresh/Entertainment/song/"+str(fn))
+		for fn in os.listdir(path):
+			URLs.append(path+"/"+str(fn))
  		# pprint(URLs)
  		# input()
  		self.x = itertools.cycle(URLs)
